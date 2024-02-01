@@ -19,6 +19,8 @@
     <button @click="setupStoreIncrement">actions</button>
     <button @click="setupPatch">setup patch</button>
     <button @click="setupReset">setup reset</button>
+    <button @click="addSubscription">添加订阅</button>
+    <button @click="removeSubscription">移除订阅</button>
   </div>
 </template>
 
@@ -26,27 +28,27 @@
 import { useHOptionsStore, useHSetupStore } from '../../hPinia'
 import { storeToRefs } from '../../my_pinia'
 // options store
-const hOptionsStore = useHOptionsStore()
-console.log('hOptionsStore', hOptionsStore)
-const refHOptionsStore = storeToRefs(hOptionsStore)
-console.log('ref options store', refHOptionsStore)
-const hOptionsStoreCount = refHOptionsStore.count
-const hOptionsStoreDoubleCount = refHOptionsStore.doubleCount
-const hOptionsStoreIncrement = hOptionsStore.increment
-let hOptionsStorePatch = () => {
-  hOptionsStore.$patch({
-    count: 22,
-  })
-}
-let hOptionsStoreReset = () => {
-  hOptionsStore.$reset()
-}
-hOptionsStore.$subscribe(() => {
-  console.log('响应 h_store 中 state 的变化')
-})
-hOptionsStore.$onAction(() => {
-  console.log('响应 h_store 中 action 的变化')
-})
+// const hOptionsStore = useHOptionsStore()
+// console.log('hOptionsStore', hOptionsStore)
+// const refHOptionsStore = storeToRefs(hOptionsStore)
+// console.log('ref options store', refHOptionsStore)
+// const hOptionsStoreCount = refHOptionsStore.count
+// const hOptionsStoreDoubleCount = refHOptionsStore.doubleCount
+// const hOptionsStoreIncrement = hOptionsStore.increment
+// let hOptionsStorePatch = () => {
+//   hOptionsStore.$patch({
+//     count: 22,
+//   })
+// }
+// let hOptionsStoreReset = () => {
+//   hOptionsStore.$reset()
+// }
+// hOptionsStore.$subscribe(() => {
+//   console.log('响应 h_store 中 state 的变化')
+// })
+// hOptionsStore.$onAction(() => {
+//   console.log('响应 h_store 中 action 的变化')
+// })
 
 // setup store
 const setupStore = useHSetupStore()
@@ -60,12 +62,17 @@ let setupPatch = () => {
   })
 }
 let setupReset = setupStore.$reset
-setupStore.$subscribe((mutation: any, state: any) => {
-  console.log('响应 h_store 中 state 的变化', mutation, state)
-})
-setupStore.$onAction(() => {
-  console.log('响应 h_store 中 action 的变化')
-})
+let removeSubscription: any = () => {}
+function addSubscription() {
+  removeSubscription = setupStore.$subscribe((mutation: any, state: any) => {
+    console.log('响应 h_store 中 state 的变化', mutation, state)
+  })
+}
+// function addSubscription() {
+//   setupStore.$onAction(() => {
+//     console.log('响应 h_store 中 action 的变化')
+//   })
+// }
 </script>
 
 <style scoped></style>

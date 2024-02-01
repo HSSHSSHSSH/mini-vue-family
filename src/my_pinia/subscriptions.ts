@@ -10,6 +10,7 @@ export function addSubscription<T extends _Method>(
   detached? :boolean,
   onCleanup: () => void = noop, // 默认值为 noop
 ){
+  console.log('添加订阅')
   subscriptions.push(callback)
 
   const removeSubscription = () => {

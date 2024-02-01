@@ -292,11 +292,12 @@ function createSetupStore<
   /**
    * isListening 与 isSyncListening 的作用
    * 在 $patch 与 partialStore（Store 实例的通用数据方法） 中使用
+   * 在 subscribe 中使用
    */
   let isListening: boolean // 在最后设置为 true
   let isSyncListening: boolean // 在最后设置为 true
-  let subscriptions: SubscriptionCallback<S>[] = []
-  let actionsSubscriptions: StoreOnActionListener<Id, S, G, A>[] = []
+  let subscriptions: SubscriptionCallback<S>[] = [] // state 的订阅函数
+  let actionsSubscriptions: StoreOnActionListener<Id, S, G, A>[] = [] // action 的订阅函数
   let debuggerEvents: DebuggerEvent[] | DebuggerEvent
   const initialState = pinia.state.value[$id] as UnwrapRef<S> | undefined
 
@@ -347,6 +348,7 @@ function createSetupStore<
 
     nextTick().then(() => {
       if (activeListener === myListenerId) {
+        isListening = true
       }
     })
     isSyncListening = true
@@ -398,7 +400,6 @@ function createSetupStore<
         // 用于注册 action 执行出错时的回调函数
         onErrorCallbackList.push(callback)
       }
-
       //@ts-expect-error
       triggerSubscriptions(actionsSubscriptions, {
         args,
@@ -411,8 +412,6 @@ function createSetupStore<
       let ret: unknown
 
       try {
-        console.log('this', this, this.$id, $id, this && this.$id === $id)
-        console.log('store', store)
         ret = action.apply(this && this.$id === $id ? this : store, args)
       } catch (error) {
         triggerSubscriptions(onErrorCallbackList, error)
@@ -463,7 +462,7 @@ function createSetupStore<
         () => stopWatcher(),
       )
 
-      const stopWatcher = scope.run(() =>
+      const stopWatcher = scope.run(() => // 在移除监听时做的操作
         watch(
           () => pinia.state.value[$id] as UnwrapRef<S>,
           (state: any) => {
@@ -485,7 +484,6 @@ function createSetupStore<
     },
     $dispose,
   } as _StoreWithState<Id, S, G, A>
-
   /* istanbul ignore if */
   if (isVue2) {
     // start as non ready
@@ -501,7 +499,6 @@ function createSetupStore<
         )
       : partialStore,
   ) as unknown) as Store<Id, S, G, A>
-
   // 避免无线循环
   pinia._s.set($id, store as Store)
 
